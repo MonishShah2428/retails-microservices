@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: product-service
+
+server:
+  port: 7001
+
+logging:
+  level:
+    root: INFO
+    se.magnus.microservices: DEBUG

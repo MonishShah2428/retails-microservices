@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: product-composite-service
+server:
+    port: 7000
+app:
+    product-service:
+        host: localhost
+        port: 7001
+    recommendation-service:
+        host: localhost
+        port: 7002
+    review-service:
+        host: localhost
+        port: 7003
