@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: review-service
+
+server:
+  port: 7003
+
+logging:
+  level:
+    root: INFO
+    se.magnus.microservices: DEBUG

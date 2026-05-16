@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -25,13 +24,10 @@ import se.magnus.api.exceptions.InvalidInputException;
 import se.magnus.api.exceptions.NotFoundException;
 import se.magnus.util.http.HttpErrorInfo;
 import tools.jackson.databind.ObjectMapper;
+
 @Component
 public class ProductCompositeInteg implements ProductService, RecommendationService, ReviewService {
 
-   @Bean
-   RestTemplate restTemplate() {
-      return new RestTemplate();
-   }
    private final RestTemplate restTemplate;
    private final ObjectMapper objectMapper;
 
@@ -51,10 +47,9 @@ public class ProductCompositeInteg implements ProductService, RecommendationServ
       this.restTemplate = restTemplate;
       this.objectMapper = objectMapper;
 
-      this.productServiceUrl = "http://" + productServiceHost + ":" + productServicePort + "/product/{productId}";
-      this.recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort
-            + "/recommendation?productId={productId}";
-      this.reviewServiceUrl = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review?productId={productId}";
+      this.productServiceUrl = "http://" + productServiceHost + ":" + productServicePort + "/product/";
+      this.recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation?productId=";
+      this.reviewServiceUrl = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review?productId=";
    }
 
    public Product getProduct(int productId) {
