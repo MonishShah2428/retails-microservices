@@ -2,7 +2,6 @@ package se.magnus.microservices.composite.product.service;
 
 import static org.springframework.http.HttpMethod.GET;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -27,6 +26,8 @@ import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class ProductCompositeInteg implements ProductService, RecommendationService, ReviewService {
+
+   private static final Logger LOG = LoggerFactory.getLogger(ProductCompositeInteg.class);
 
    private final RestTemplate restTemplate;
    private final ObjectMapper objectMapper;
@@ -53,25 +54,52 @@ public class ProductCompositeInteg implements ProductService, RecommendationServ
    }
 
    public Product getProduct(int productId) {
-      String url = productServiceUrl + productId;
-      Product product = restTemplate.getForObject(url, Product.class);
-      return product;
-   }
+      try {
+         String url = productServiceUrl + productId;
+         return restTemplate.getForObject(url, Product.class);
+      } catch (HttpClientErrorException ex) {
 
+         switch (HttpStatus.resolve(ex.getStatusCode().value())) {
+         case NOT_FOUND:
+            throw new NotFoundException(getErrorMessage(ex));
+
+         case UNPROCESSABLE_CONTENT:
+            throw new InvalidInputException(getErrorMessage(ex));
+
+         default:
+            LOG.warn("Got an unexpected HTTP error: {}, will rethrow it", ex.getStatusCode());
+            LOG.warn("Error body: {}", ex.getResponseBodyAsString());
+            throw ex;
+         }
+      }
+   }
+   private String getErrorMessage(HttpClientErrorException ex) {
+      try {
+         return objectMapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
+      } catch (Exception ioex) {
+         return ex.getMessage();
+      }
+   }
    public List<Recommendation> getRecommendations(int productId) {
-      String url = recommendationServiceUrl + productId;
-      List<Recommendation> recommendations =
-      restTemplate.exchange(url, GET, null, new
-      ParameterizedTypeReference<List<Recommendation>>()
-      {}).getBody();
-      return recommendations;
+      try {
+         String url = recommendationServiceUrl + productId;
+         return restTemplate.exchange(url, GET, null,
+            new ParameterizedTypeReference<List<Recommendation>>() {}).getBody();
+      } catch (HttpClientErrorException ex) {
+         LOG.warn("Got an exception while requesting recommendations, return zero recommendations: {}", ex.getMessage());
+         return new ArrayList<>();
+      }
    }
 
    public List<Review> getReviews(int productId) {
-      String url = reviewServiceUrl + productId;
-      List<Review> reviews = restTemplate.exchange(url, GET, null,
-      new ParameterizedTypeReference<List<Review>>() {}).getBody();
-      return reviews;
+      try {
+         String url = reviewServiceUrl + productId;
+         return restTemplate.exchange(url, GET, null,
+            new ParameterizedTypeReference<List<Review>>() {}).getBody();
+      } catch (HttpClientErrorException ex) {
+         LOG.warn("Got an exception while requesting reviews, return zero reviews: {}", ex.getMessage());
+         return new ArrayList<>();
+      }
    }
    
 }

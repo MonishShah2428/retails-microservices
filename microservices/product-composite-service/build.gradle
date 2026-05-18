@@ -26,6 +26,8 @@ dependencies {
 	implementation project(':api')
 	implementation project(':util')
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:3.0.3'
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.3'
 }
 
 tasks.named('test') {
