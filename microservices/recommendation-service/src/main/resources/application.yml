@@ -9,7 +9,13 @@ logging:
   level:
     root: INFO
     se.magnus.microservices: DEBUG
+    org.springframework.web: DEBUG
 
+spring.mongodb:
+  host: localhost
+  port: 27017
+  database: recommendation-db
 ---
 spring.config.activate.on-profile: docker
+spring.mongodb.host: mongodb
 server.port: 8080
