@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -33,9 +33,10 @@ public class ProductCompositeServiceApplication {
 	@Value("${api.common.contact.name}")    String apiContactName;
 	@Value("${api.common.contact.url}")     String apiContactUrl;
 	@Value("${api.common.contact.email}")   String apiContactEmail;
+
 	@Bean
-	RestTemplate restTemplate() {
-		return new RestTemplate();
+	WebClient.Builder webClientBuilder() {
+		return WebClient.builder();
 	}
 
 	@Bean

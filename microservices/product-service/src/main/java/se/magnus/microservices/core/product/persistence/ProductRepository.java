@@ -1,11 +1,11 @@
 package se.magnus.microservices.core.product.persistence;
 
-import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
-
-public interface ProductRepository extends PagingAndSortingRepository<ProductEntity, String>, CrudRepository<ProductEntity, String> {
-  Optional<ProductEntity> findByProductId(int productId);
-    
+public interface ProductRepository extends ReactiveMongoRepository<ProductEntity, String> {
+  Mono<ProductEntity> findByProductId(int productId);
+  Flux<ProductEntity> findAllBy(Pageable pageable);
 }

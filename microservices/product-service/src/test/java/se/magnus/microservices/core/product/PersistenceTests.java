@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.mongodb.test.autoconfigure.DataMongoTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import reactor.test.StepVerifier;
 import se.magnus.microservices.core.product.persistence.ProductEntity;
 import se.magnus.microservices.core.product.persistence.ProductRepository;
 
-@DataMongoTest(properties = "spring.data.mongodb.auto-index-creation=true")
+@DataMongoTest(properties = "spring.mongodb.auto-index-creation=true")
 class PersistenceTests extends MongoDbTestBase {
 
   @Autowired
@@ -29,111 +28,104 @@ class PersistenceTests extends MongoDbTestBase {
 
   @BeforeEach
   void setupDb() {
-    repository.deleteAll();
+    repository.deleteAll().block();
 
     ProductEntity entity = new ProductEntity(1, "n", 1);
-    savedEntity = repository.save(entity);
+    savedEntity = repository.save(entity).block();
 
     assertEqualsProduct(entity, savedEntity);
   }
 
-
   @Test
   void create() {
-
     ProductEntity newEntity = new ProductEntity(2, "n", 2);
-    repository.save(newEntity);
+    repository.save(newEntity).block();
 
-    ProductEntity foundEntity = repository.findById(newEntity.getId()).get();
+    ProductEntity foundEntity = repository.findById(newEntity.getId()).block();
     assertEqualsProduct(newEntity, foundEntity);
 
-    assertEquals(2, repository.count());
+    assertEquals(2, repository.count().block());
   }
 
   @Test
   void update() {
     savedEntity.setName("n2");
-    repository.save(savedEntity);
+    repository.save(savedEntity).block();
 
-    ProductEntity foundEntity = repository.findById(savedEntity.getId()).get();
-    assertEquals(1, (long)foundEntity.getVersion());
+    ProductEntity foundEntity = repository.findById(savedEntity.getId()).block();
+    assertEquals(1, (long) foundEntity.getVersion());
     assertEquals("n2", foundEntity.getName());
   }
 
   @Test
   void delete() {
-    repository.delete(savedEntity);
-    assertFalse(repository.existsById(savedEntity.getId()));
+    repository.delete(savedEntity).block();
+    assertFalse(repository.existsById(savedEntity.getId()).block());
   }
 
   @Test
   void getByProductId() {
-    Optional<ProductEntity> entity = repository.findByProductId(savedEntity.getProductId());
+    ProductEntity entity = repository.findByProductId(savedEntity.getProductId()).block();
 
-    assertTrue(entity.isPresent());
-    assertEqualsProduct(savedEntity, entity.get());
+    assertNotNull(entity);
+    assertEqualsProduct(savedEntity, entity);
   }
 
   @Test
   void duplicateError() {
-    assertThrows(DuplicateKeyException.class, () -> {
-      ProductEntity entity = new ProductEntity(savedEntity.getProductId(), "n", 1);
-      repository.save(entity);
-    });
+    StepVerifier.create(repository.save(new ProductEntity(savedEntity.getProductId(), "n", 1)))
+      .expectError(DuplicateKeyException.class)
+      .verify();
   }
 
   @Test
   void optimisticLockError() {
+    ProductEntity entity1 = repository.findById(savedEntity.getId()).block();
+    ProductEntity entity2 = repository.findById(savedEntity.getId()).block();
 
-    // Store the saved entity in two separate entity objects
-    ProductEntity entity1 = repository.findById(savedEntity.getId()).get();
-    ProductEntity entity2 = repository.findById(savedEntity.getId()).get();
-
-    // Update the entity using the first entity object
     entity1.setName("n1");
-    repository.save(entity1);
+    repository.save(entity1).block();
 
-    // Update the entity using the second entity object.
-    // This should fail since the second entity now holds an old version number, i.e. an Optimistic Lock Error
-    assertThrows(OptimisticLockingFailureException.class, () -> {
-      entity2.setName("n2");
-      repository.save(entity2);
-    }); 
+    entity2.setName("n2");
+    StepVerifier.create(repository.save(entity2))
+      .expectError(OptimisticLockingFailureException.class)
+      .verify();
 
-    // Get the updated entity from the database and verify its new sate
-    ProductEntity updatedEntity = repository.findById(savedEntity.getId()).get();
-    assertEquals(1, (int)updatedEntity.getVersion());
+    ProductEntity updatedEntity = repository.findById(savedEntity.getId()).block();
+    assertEquals(1, (int) updatedEntity.getVersion());
     assertEquals("n1", updatedEntity.getName());
   }
 
   @Test
   void paging() {
-
-    repository.deleteAll();
+    repository.deleteAll().block();
 
     List<ProductEntity> newProducts = rangeClosed(1001, 1010)
       .mapToObj(i -> new ProductEntity(i, "name " + i, i))
       .collect(Collectors.toList());
-    repository.saveAll(newProducts);
+    repository.saveAll(newProducts).collectList().block();
 
     Pageable nextPage = PageRequest.of(0, 4, ASC, "productId");
     nextPage = testNextPage(nextPage, "[1001, 1002, 1003, 1004]", true);
     nextPage = testNextPage(nextPage, "[1005, 1006, 1007, 1008]", true);
-    nextPage = testNextPage(nextPage, "[1009, 1010]", false);
+             testNextPage(nextPage, "[1009, 1010]", false);
   }
 
   private Pageable testNextPage(Pageable nextPage, String expectedProductIds, boolean expectsNextPage) {
-    Page<ProductEntity> productPage = repository.findAll(nextPage);
-    assertEquals(expectedProductIds, productPage.getContent().stream().map(p -> p.getProductId()).collect(Collectors.toList()).toString());
-    assertEquals(expectsNextPage, productPage.hasNext());
-    return productPage.nextPageable();
+    List<ProductEntity> products = repository.findAllBy(nextPage).collectList().block();
+    assertEquals(
+      expectedProductIds,
+      products.stream().map(p -> p.getProductId()).collect(Collectors.toList()).toString()
+    );
+    assertEquals(expectsNextPage, products.size() == nextPage.getPageSize());
+    return nextPage.next();
   }
 
   private void assertEqualsProduct(ProductEntity expectedEntity, ProductEntity actualEntity) {
-    assertEquals(expectedEntity.getId(),               actualEntity.getId());
-    assertEquals(expectedEntity.getVersion(),          actualEntity.getVersion());
-    assertEquals(expectedEntity.getProductId(),        actualEntity.getProductId());
-    assertEquals(expectedEntity.getName(),           actualEntity.getName());
-    assertEquals(expectedEntity.getWeight(),           actualEntity.getWeight());
+    assertEquals(expectedEntity.getId(),        actualEntity.getId());
+    assertEquals(expectedEntity.getVersion(),   actualEntity.getVersion());
+    assertEquals(expectedEntity.getProductId(), actualEntity.getProductId());
+    assertEquals(expectedEntity.getName(),      actualEntity.getName());
+    assertEquals(expectedEntity.getWeight(),    actualEntity.getWeight());
   }
 }

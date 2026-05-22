@@ -1,15 +1,22 @@
 package se.magnus.microservices.core.recommendation;
 
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.mongodb.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection; 
-
 
 public abstract class MongoDbTestBase {
-    @ServiceConnection
-    private static MongoDBContainer database = new MongoDBContainer(DockerImageName.parse("mongo:6.0.4"));
-    
-    static {
-        database.start();
-    } 
+  private static MongoDBContainer database =
+      new MongoDBContainer(DockerImageName.parse("mongo:6.0.4"));
+
+  static {
+    database.start();
+  }
+
+  @DynamicPropertySource
+  static void setProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.mongodb.host", database::getHost);
+    registry.add("spring.mongodb.port", () -> database.getMappedPort(27017));
+    registry.add("spring.mongodb.database", () -> "test");
+  }
 }
