@@ -4,21 +4,29 @@ import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import se.magnus.api.core.product.Product;
 import se.magnus.api.core.product.ProductService;
 import se.magnus.api.core.recommendation.Recommendation;
 import se.magnus.api.core.recommendation.RecommendationService;
 import se.magnus.api.core.review.Review;
 import se.magnus.api.core.review.ReviewService;
+import se.magnus.api.event.Event;
 import se.magnus.api.exceptions.InvalidInputException;
 import se.magnus.api.exceptions.NotFoundException;
 import se.magnus.util.http.HttpErrorInfo;
+
+import static se.magnus.api.event.Event.Type.CREATE;
+import static se.magnus.api.event.Event.Type.DELETE;
 
 @Component
 public class ProductCompositeIntegration implements ProductService, RecommendationService, ReviewService {
@@ -27,6 +35,8 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
 
   private final WebClient webClient;
   private final ObjectMapper mapper;
+  private final StreamBridge streamBridge;
+  private final Scheduler publishEventScheduler;
   private final String productServiceUrl;
   private final String recommendationServiceUrl;
   private final String reviewServiceUrl;
@@ -34,6 +44,8 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
   public ProductCompositeIntegration(
     WebClient.Builder webClientBuilder,
     ObjectMapper mapper,
+    StreamBridge streamBridge,
+    Scheduler publishEventScheduler,
     @Value("${app.product-service.host}") String productServiceHost,
     @Value("${app.product-service.port}") int productServicePort,
     @Value("${app.recommendation-service.host}") String recommendationServiceHost,
@@ -43,25 +55,23 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
 
     this.webClient = webClientBuilder.build();
     this.mapper = mapper;
+    this.streamBridge = streamBridge;
+    this.publishEventScheduler = publishEventScheduler;
 
-    productServiceUrl = "http://" + productServiceHost + ":" + productServicePort + "/product";
+    productServiceUrl        = "http://" + productServiceHost        + ":" + productServicePort        + "/product";
     recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation";
-    reviewServiceUrl = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review";
+    reviewServiceUrl         = "http://" + reviewServiceHost         + ":" + reviewServicePort         + "/review";
   }
 
   @Override
   public Mono<Product> createProduct(Product body) {
-    LOG.debug("createProduct: creates a new product entity for productId: {}", body.productId());
-    return webClient.post()
-      .uri(productServiceUrl)
-      .bodyValue(body)
-      .retrieve()
-      .onStatus(HttpStatusCode::isError, this::handleError)
-      .bodyToMono(Product.class)
-      .doOnNext(p -> LOG.debug("createProduct: created a product entity for productId: {}", p.productId()));
+    return Mono.fromCallable(() -> {
+      sendMessage("products-out-0", new Event<>(CREATE, body.productId(), body));
+      return body;
+    }).subscribeOn(publishEventScheduler);
   }
 
-    @Override
+  @Override
   public Mono<Product> getProduct(int productId) {
     String url = productServiceUrl + "/" + productId;
     LOG.debug("Will call the getProduct API on URL: {}", url);
@@ -75,25 +85,18 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
 
   @Override
   public Mono<Void> deleteProduct(int productId) {
-    String url = productServiceUrl + "/" + productId;
-    LOG.debug("Will call the deleteProduct API on URL: {}", url);
-    return webClient.delete()
-      .uri(url)
-      .retrieve()
-      .onStatus(HttpStatusCode::isError, this::handleError)
-      .bodyToMono(Void.class);
+    return Mono.fromRunnable(() ->
+      sendMessage("products-out-0", new Event<>(DELETE, productId, null)))
+      .subscribeOn(publishEventScheduler)
+      .then();
   }
 
   @Override
   public Mono<Recommendation> createRecommendation(Recommendation body) {
-    LOG.debug("Will post a new recommendation to URL: {}", recommendationServiceUrl);
-    return webClient.post()
-      .uri(recommendationServiceUrl)
-      .bodyValue(body)
-      .retrieve()
-      .onStatus(HttpStatusCode::isError, this::handleError)
-      .bodyToMono(Recommendation.class)
-      .doOnNext(r -> LOG.debug("Created a recommendation with id: {}", r.recommendationId()));
+    return Mono.fromCallable(() -> {
+      sendMessage("recommendations-out-0", new Event<>(CREATE, body.productId(), body));
+      return body;
+    }).subscribeOn(publishEventScheduler);
   }
 
   @Override
@@ -112,25 +115,18 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
 
   @Override
   public Mono<Void> deleteRecommendations(int productId) {
-    String url = recommendationServiceUrl + "?productId=" + productId;
-    LOG.debug("Will call the deleteRecommendations API on URL: {}", url);
-    return webClient.delete()
-      .uri(url)
-      .retrieve()
-      .onStatus(HttpStatusCode::isError, this::handleError)
-      .bodyToMono(Void.class);
+    return Mono.fromRunnable(() ->
+      sendMessage("recommendations-out-0", new Event<>(DELETE, productId, null)))
+      .subscribeOn(publishEventScheduler)
+      .then();
   }
 
   @Override
   public Mono<Review> createReview(Review body) {
-    LOG.debug("Will post a new review to URL: {}", reviewServiceUrl);
-    return webClient.post()
-      .uri(reviewServiceUrl)
-      .bodyValue(body)
-      .retrieve()
-      .onStatus(HttpStatusCode::isError, this::handleError)
-      .bodyToMono(Review.class)
-      .doOnNext(r -> LOG.debug("Created a review with id: {}", r.reviewId()));
+    return Mono.fromCallable(() -> {
+      sendMessage("reviews-out-0", new Event<>(CREATE, body.productId(), body));
+      return body;
+    }).subscribeOn(publishEventScheduler);
   }
 
   @Override
@@ -149,13 +145,18 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
 
   @Override
   public Mono<Void> deleteReviews(int productId) {
-    String url = reviewServiceUrl + "?productId=" + productId;
-    LOG.debug("Will call the deleteReviews API on URL: {}", url);
-    return webClient.delete()
-      .uri(url)
-      .retrieve()
-      .onStatus(HttpStatusCode::isError, this::handleError)
-      .bodyToMono(Void.class);
+    return Mono.fromRunnable(() ->
+      sendMessage("reviews-out-0", new Event<>(DELETE, productId, null)))
+      .subscribeOn(publishEventScheduler)
+      .then();
+  }
+
+  private void sendMessage(String bindingName, Event<?, ?> event) {
+    LOG.debug("Sending a {} message to {}", event.getType(), bindingName);
+    Message<?> message = MessageBuilder.withPayload(event)
+      .setHeader("partitionKey", event.getKey())
+      .build();
+    streamBridge.send(bindingName, message);
   }
 
   private Mono<Throwable> handleError(ClientResponse response) {

@@ -82,6 +82,28 @@ api:
 spring:
   application:
     name: product-composite-service
+  cloud:
+    stream:
+      defaultBinder: rabbit
+      default.contentType: application/json
+      bindings:
+        products-out-0:
+          destination: products
+        recommendations-out-0:
+          destination: recommendations
+        reviews-out-0:
+          destination: reviews
+      kafka:
+        binder:
+          brokers: 127.0.0.1
+          defaultBrokerPort: 9092
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
 server:
     port: 7000
 app:
@@ -99,6 +121,8 @@ app:
 
 spring.config.activate.on-profile: docker
 server.port: 8080
+spring.rabbitmq.host: rabbitmq
+spring.cloud.stream.kafka.binder.brokers: kafka
 app:
     product-service:
         host: product

@@ -3,9 +3,16 @@ package se.magnus.microservices.composite.product;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -37,6 +44,23 @@ public class ProductCompositeServiceApplication {
 	@Bean
 	WebClient.Builder webClientBuilder() {
 		return WebClient.builder();
+	}
+
+	@Bean("integrationConversionService")
+	@ConditionalOnMissingBean(name = "integrationConversionService")
+	public GenericConversionService integrationConversionService() {
+		return new DefaultConversionService();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public TaskScheduler taskScheduler() {
+		return new ThreadPoolTaskScheduler();
+	}
+
+	@Bean
+	public Scheduler publishEventScheduler() {
+		return Schedulers.newBoundedElastic(10, 10, "publish-pool");
 	}
 
 	@Bean
