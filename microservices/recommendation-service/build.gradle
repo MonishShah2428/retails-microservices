@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.6'
+	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -15,7 +15,7 @@ java {
 
 ext {
 	mapstructVersion = "1.5.5.Final"
-	springCloudVersion = "2025.0.1"
+	springCloudVersion = "2024.0.1"
 }
 
 repositories {
@@ -42,13 +42,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
-	testImplementation 'org.springframework.boot:spring-boot-data-mongodb-test'
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-
-    testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
-    testImplementation 'org.testcontainers:testcontainers'
-    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
-    testImplementation 'org.testcontainers:testcontainers-mongodb'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.24.0'
 }
 
 dependencyManagement {

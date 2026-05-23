@@ -32,7 +32,7 @@ logging:
     se.magnus.microservices: DEBUG
     org.springframework.web: DEBUG
 
-spring.mongodb:
+spring.data.mongodb:
   host: localhost
   port: 27017
   database: product-db
@@ -45,7 +45,7 @@ spring.rabbitmq:
 
 ---
 spring.config.activate.on-profile: docker
-spring.mongodb.host: mongodb
+spring.data.mongodb.host: mongodb
 spring.rabbitmq.host: rabbitmq
 spring.cloud.stream.kafka.binder.brokers: kafka
 server.port: 8080

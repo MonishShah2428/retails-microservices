@@ -2,22 +2,15 @@ package se.magnus.microservices.core.review;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.mysql.MySQLContainer;
 
 public abstract class MySqlTestBase {
 
-  private static MySQLContainer database =
-      new MySQLContainer("mysql:8.0.32").withStartupTimeoutSeconds(300);
-
-  static {
-    database.start();
-  }
-
   @DynamicPropertySource
   static void databaseProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", database::getJdbcUrl);
-    registry.add("spring.datasource.username", database::getUsername);
-    registry.add("spring.datasource.password", database::getPassword);
+    registry.add("spring.datasource.url",
+        () -> "jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+    registry.add("spring.datasource.username", () -> "sa");
+    registry.add("spring.datasource.password", () -> "");
     registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
   }
 }

@@ -41,6 +41,6 @@ public class ProductServiceApplication {
     IndexResolver resolver = new MongoPersistentEntityIndexResolver(mappingContext);
 
     ReactiveIndexOperations indexOps = mongoTemplate.indexOps(ProductEntity.class);
-    resolver.resolveIndexFor(ProductEntity.class).forEach(e -> indexOps.createIndex(e).block());
+    resolver.resolveIndexFor(ProductEntity.class).forEach(e -> indexOps.ensureIndex(e).block());
   }
 }

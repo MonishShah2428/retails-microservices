@@ -19,8 +19,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
 
 
 
@@ -61,11 +59,6 @@ public class ProductCompositeServiceApplication {
 	@Bean
 	public Scheduler publishEventScheduler() {
 		return Schedulers.newBoundedElastic(10, 10, "publish-pool");
-	}
-
-	@Bean
-	ObjectMapper objectMapper() {
-		return JsonMapper.builder().build();
 	}
 
 	@Bean
