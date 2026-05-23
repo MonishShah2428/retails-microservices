@@ -2,7 +2,6 @@ package se.magnus.microservices.core.product.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,7 +10,6 @@ import se.magnus.api.core.product.Product;
 import se.magnus.api.core.product.ProductService;
 import se.magnus.api.exceptions.InvalidInputException;
 import se.magnus.api.exceptions.NotFoundException;
-import se.magnus.microservices.core.product.persistence.ProductEntity;
 import se.magnus.microservices.core.product.persistence.ProductRepository;
 import se.magnus.util.http.ServiceUtil;
 
@@ -26,7 +24,6 @@ public class ProductServiceImplementation implements ProductService {
 
     private final ProductMapper mapper;
 
-    @Autowired
     public ProductServiceImplementation(ServiceUtil serviceUtil, ProductRepository repository, ProductMapper mapper) {
         this.serviceUtil = serviceUtil;
         this.repository = repository;
