@@ -1,4 +1,5 @@
 services:
+
   product:
     build: microservices/product-service
     mem_limit: 512m
@@ -6,6 +7,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       mongodb:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   recommendation:
@@ -16,6 +19,8 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   review:
     build: microservices/review-service
@@ -24,6 +29,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       mysql:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   product-composite:
@@ -34,9 +41,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - product
-      - recommendation
-      - review
+      rabbitmq:
+        condition: service_healthy
 
   mongodb:
     image: mongo:8.0
@@ -64,4 +70,16 @@ services:
       test: "/usr/bin/mysql --user=user --password=pwd --execute \"SHOW DATABASES;\""
       interval: 5s
       timeout: 2s
+      retries: 60
+
+  rabbitmq:
+    image: rabbitmq:management
+    mem_limit: 768m
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
       retries: 60

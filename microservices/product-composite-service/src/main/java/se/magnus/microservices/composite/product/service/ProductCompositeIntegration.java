@@ -4,6 +4,7 @@ import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.health.contributor.Health;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.messaging.Message;
@@ -25,6 +26,8 @@ import se.magnus.api.exceptions.InvalidInputException;
 import se.magnus.api.exceptions.NotFoundException;
 import se.magnus.util.http.HttpErrorInfo;
 
+import java.util.logging.Level;
+
 import static se.magnus.api.event.Event.Type.CREATE;
 import static se.magnus.api.event.Event.Type.DELETE;
 
@@ -40,6 +43,9 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
   private final String productServiceUrl;
   private final String recommendationServiceUrl;
   private final String reviewServiceUrl;
+  private final String productServiceHealthUrl;
+  private final String recommendationServiceHealthUrl;
+  private final String reviewServiceHealthUrl;
 
   public ProductCompositeIntegration(
     WebClient.Builder webClientBuilder,
@@ -61,6 +67,10 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
     productServiceUrl        = "http://" + productServiceHost        + ":" + productServicePort        + "/product";
     recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation";
     reviewServiceUrl         = "http://" + reviewServiceHost         + ":" + reviewServicePort         + "/review";
+
+    productServiceHealthUrl        = "http://" + productServiceHost        + ":" + productServicePort;
+    recommendationServiceHealthUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort;
+    reviewServiceHealthUrl         = "http://" + reviewServiceHost         + ":" + reviewServicePort;
   }
 
   @Override
@@ -149,6 +159,27 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
       sendMessage("reviews-out-0", new Event<>(DELETE, productId, null)))
       .subscribeOn(publishEventScheduler)
       .then();
+  }
+
+  public Mono<Health> getProductHealth() {
+    return getHealth(productServiceHealthUrl);
+  }
+
+  public Mono<Health> getRecommendationHealth() {
+    return getHealth(recommendationServiceHealthUrl);
+  }
+
+  public Mono<Health> getReviewHealth() {
+    return getHealth(reviewServiceHealthUrl);
+  }
+
+  private Mono<Health> getHealth(String url) {
+    url += "/actuator/health";
+    LOG.debug("Will call the Health API on URL: {}", url);
+    return webClient.get().uri(url).retrieve().bodyToMono(String.class)
+      .map(s -> new Health.Builder().up().build())
+      .onErrorResume(ex -> Mono.just(new Health.Builder().down(ex).build()))
+      .log(LOG.getName(), Level.FINE);
   }
 
   private void sendMessage(String bindingName, Event<?, ?> event) {

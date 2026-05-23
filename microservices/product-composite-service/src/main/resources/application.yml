@@ -89,10 +89,16 @@ spring:
       bindings:
         products-out-0:
           destination: products
+          producer:
+            required-groups: auditGroup
         recommendations-out-0:
           destination: recommendations
+          producer:
+            required-groups: auditGroup
         reviews-out-0:
           destination: reviews
+          producer:
+            required-groups: auditGroup
       kafka:
         binder:
           brokers: 127.0.0.1
@@ -106,6 +112,9 @@ spring.rabbitmq:
 
 server:
     port: 7000
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
 app:
     product-service:
         host: localhost

@@ -1,22 +1,6 @@
 spring:
   application:
     name: recommendation-service
-
-server:
-  port: 7002
-
-logging:
-  level:
-    root: INFO
-    se.magnus.microservices: DEBUG
-    org.springframework.web: DEBUG
-
-spring.mongodb:
-  host: localhost
-  port: 27017
-  database: recommendation-db
-
-spring:
   cloud:
     stream:
       defaultBinder: rabbit
@@ -35,6 +19,23 @@ spring:
         binder:
           brokers: 127.0.0.1
           defaultBrokerPort: 9092
+
+server:
+  port: 7002
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
+
+logging:
+  level:
+    root: INFO
+    se.magnus.microservices: DEBUG
+    org.springframework.web: DEBUG
+
+spring.mongodb:
+  host: localhost
+  port: 27017
+  database: recommendation-db
 
 spring.rabbitmq:
   host: 127.0.0.1
