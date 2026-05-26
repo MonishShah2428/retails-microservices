@@ -5,7 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 
-@SpringBootTest
+@SpringBootTest(properties={"eureka.client.enabled=false"})
 @Import(TestChannelBinderConfiguration.class)
 class RecommendationServiceApplicationTests extends MongoDbTestBase {
 	

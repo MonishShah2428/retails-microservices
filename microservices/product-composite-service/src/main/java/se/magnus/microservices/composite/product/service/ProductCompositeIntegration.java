@@ -3,7 +3,6 @@ package se.magnus.microservices.composite.product.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpStatusCode;
@@ -51,26 +50,20 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
     WebClient.Builder webClientBuilder,
     ObjectMapper mapper,
     StreamBridge streamBridge,
-    Scheduler publishEventScheduler,
-    @Value("${app.product-service.host}") String productServiceHost,
-    @Value("${app.product-service.port}") int productServicePort,
-    @Value("${app.recommendation-service.host}") String recommendationServiceHost,
-    @Value("${app.recommendation-service.port}") int recommendationServicePort,
-    @Value("${app.review-service.host}") String reviewServiceHost,
-    @Value("${app.review-service.port}") int reviewServicePort) {
+    Scheduler publishEventScheduler) {
 
     this.webClient = webClientBuilder.build();
     this.mapper = mapper;
     this.streamBridge = streamBridge;
     this.publishEventScheduler = publishEventScheduler;
 
-    productServiceUrl        = "http://" + productServiceHost        + ":" + productServicePort        + "/product";
-    recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation";
-    reviewServiceUrl         = "http://" + reviewServiceHost         + ":" + reviewServicePort         + "/review";
+    productServiceUrl        = "http://product-service/product";
+    recommendationServiceUrl = "http://recommendation-service/recommendation";
+    reviewServiceUrl         = "http://review-service/review";
 
-    productServiceHealthUrl        = "http://" + productServiceHost        + ":" + productServicePort;
-    recommendationServiceHealthUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort;
-    reviewServiceHealthUrl         = "http://" + reviewServiceHost         + ":" + reviewServicePort;
+    productServiceHealthUrl        = "http://product-service";
+    recommendationServiceHealthUrl = "http://recommendation-service";
+    reviewServiceHealthUrl         = "http://review-service";
   }
 
   @Override

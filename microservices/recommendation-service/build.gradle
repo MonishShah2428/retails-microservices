@@ -43,6 +43,8 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.24.0'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
 
 dependencyManagement {
