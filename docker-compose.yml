@@ -102,7 +102,7 @@ services:
       build: discovery/edge
       mem_limit: 512m
       ports:
-        - "8080:8080"
+        - "8443:8443"
       environment:
         - SPRING_PROFILES_ACTIVE=docker
       depends_on:

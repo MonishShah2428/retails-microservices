@@ -1,6 +1,16 @@
 server:
   port: 8761
 
+app:
+  eureka-username: eureka
+  eureka-password: password
+
+spring:
+  security:
+    user:
+      name: ${app.eureka-username}
+      password: ${app.eureka-password}
+
 eureka:
   instance:
     hostname: localhost
