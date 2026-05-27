@@ -111,7 +111,8 @@ spring.rabbitmq:
   password: guest
 
 server:
-    port: 7000
+  port: 7000
+  forward-headers-strategy: framework
 
 management.endpoint.health.show-details: "ALWAYS"
 management.endpoints.web.exposure.include: "*"
