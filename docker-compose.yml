@@ -1,5 +1,18 @@
 services:
 
+  config:
+    build: discovery/config
+    mem_limit: 512m
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,native
+      - ENCRYPT_KEY=${CONFIG_SERVER_ENCRYPT_KEY}
+      - SPRING_SECURITY_USER_NAME=${CONFIG_SERVER_USR}
+      - SPRING_SECURITY_USER_PASSWORD=${CONFIG_SERVER_PWD}
+    volumes:
+      - ./config-repo:/config-repo
+
   eureka:
     build: discovery/netflix
     mem_limit: 512m
@@ -7,13 +20,18 @@ services:
       - "8761:8761"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      
+    depends_on:
+      config:
+        condition: service_started
+
   product:
     build: microservices/product-service
     mem_limit: 512m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
+      config:
+        condition: service_started
       eureka:
         condition: service_started
       mongodb:
@@ -27,6 +45,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
+      config:
+        condition: service_started
       eureka:
         condition: service_started
       mongodb:
@@ -40,6 +60,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
+      config:
+        condition: service_started
       eureka:
         condition: service_started
       mysql:
@@ -53,6 +75,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
+      config:
+        condition: service_started
       eureka:
         condition: service_started
       rabbitmq:
@@ -88,7 +112,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
-    mem_limit: 768m
+    mem_limit: 512m
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -106,5 +130,7 @@ services:
       environment:
         - SPRING_PROFILES_ACTIVE=docker
       depends_on:
+        config:
+          condition: service_started
         eureka:
           condition: service_started

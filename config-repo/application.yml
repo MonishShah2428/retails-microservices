@@ -1,0 +1,33 @@
+app:
+  eureka-username: eureka
+  eureka-password: password
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@localhost:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
+management:
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+---
+spring.config.activate.on-profile: docker
+eureka.client.serviceUrl.defaultZone: http://${app.eureka-username}:${app.eureka-password}@eureka:8761/eureka/
+spring.rabbitmq.host: rabbitmq

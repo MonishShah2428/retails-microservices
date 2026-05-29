@@ -1,0 +1,23 @@
+server.port: 8761
+
+spring:
+  security:
+    user:
+      name: ${app.eureka-username}
+      password: ${app.eureka-password}
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    waitTimeInMsWhenSyncEmpty: 0
+    response-cache-update-interval-ms: 5000
+
+---
+spring.config.activate.on-profile: docker
+eureka.instance.hostname: eureka

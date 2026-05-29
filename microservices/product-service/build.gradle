@@ -44,6 +44,9 @@ dependencies {
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.24.0'
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 }
 

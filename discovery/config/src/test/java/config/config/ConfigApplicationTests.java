@@ -1,10 +1,10 @@
-package netflix.eureka;
+package config.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties={"spring.cloud.config.enabled=false"})
-class NetflixApplicationTests {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+class ConfigApplicationTests {
 
 	@Test
 	void contextLoads() {

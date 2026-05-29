@@ -1,0 +1,38 @@
+server.port: 7002
+
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: recommendation-db
+  cloud:
+    stream:
+      defaultBinder: rabbit
+      default.contentType: application/json
+      bindings:
+        messageProcessor-in-0:
+          destination: recommendations
+          group: recommendationsGroup
+      rabbit:
+        bindings:
+          messageProcessor-in-0:
+            consumer:
+              auto-bind-dlq: true
+              republish-to-dlq: true
+      kafka:
+        binder:
+          brokers: 127.0.0.1
+          defaultBrokerPort: 9092
+
+logging:
+  level:
+    root: INFO
+    se.magnus.microservices: DEBUG
+    org.springframework.web: DEBUG
+
+---
+spring.config.activate.on-profile: docker
+server.port: 8080
+spring.data.mongodb.host: mongodb
+spring.cloud.stream.kafka.binder.brokers: kafka

@@ -1,0 +1,77 @@
+server:
+  port: 7000
+  forward-headers-strategy: framework
+
+springdoc:
+  swagger-ui.path: /openapi/swagger-ui.html
+  api-docs.path: /openapi/v3/api-docs
+  packagesToScan: se.magnus.microservices.composite.product
+  pathsToMatch: /**
+
+api:
+  common:
+    version: 1.0.0
+    title: Sample API
+    description: Description of the API...
+    termsOfService: MY TERMS OF SERVICE
+    license: MY LICENSE
+    licenseUrl: MY LICENSE URL
+    externalDocDesc: MY WIKI PAGE
+    externalDocUrl: MY WIKI URL
+    contact:
+      name: NAME OF CONTACT
+      url: URL TO CONTACT
+      email: contact@mail.com
+    responseCodes:
+      ok.description: OK
+      badRequest.description: Bad Request, invalid format of the request. See response message for more information
+      notFound.description: Not found, the specified id does not exist
+      unprocessableEntity.description: Unprocessable entity, input parameters caused the processing to fail. See response message for more information
+    product-composite:
+      get-composite-product:
+        description: Returns a composite view of the specified product id
+        notes: |
+          # Normal response
+          If the requested product id is found the method will return information regarding:
+          1. Base product information
+          1. Reviews
+          1. Recommendations
+          1. Service Addresses
+      create-composite-product:
+        description: Creates a composite product
+        notes: |
+          # Normal response
+          The composite product information posted to the API will be split up and stored as separate product-info, recommendation and review entities.
+      delete-composite-product:
+        description: Deletes a product composite
+        notes: |
+          # Normal response
+          Entities for product information, recommendations and reviews related to the specified productId will be deleted.
+
+spring:
+  cloud:
+    stream:
+      defaultBinder: rabbit
+      default.contentType: application/json
+      bindings:
+        products-out-0:
+          destination: products
+          producer:
+            required-groups: auditGroup
+        recommendations-out-0:
+          destination: recommendations
+          producer:
+            required-groups: auditGroup
+        reviews-out-0:
+          destination: reviews
+          producer:
+            required-groups: auditGroup
+      kafka:
+        binder:
+          brokers: 127.0.0.1
+          defaultBrokerPort: 9092
+
+---
+spring.config.activate.on-profile: docker
+server.port: 8080
+spring.cloud.stream.kafka.binder.brokers: kafka
