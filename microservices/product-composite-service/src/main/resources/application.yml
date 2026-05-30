@@ -2,7 +2,7 @@ spring:
   application:
     name: product-composite-service
   config:
-    import: "configserver:"
+    import: "optional:configserver:"
   cloud:
     config:
       failFast: true

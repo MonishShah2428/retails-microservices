@@ -1,0 +1,22 @@
+server:
+  port: 7000
+
+spring:
+  cloud:
+    config:
+      enabled: false
+
+api:
+  common:
+    version: test
+    title: test
+    description: test
+    termsOfService: test
+    license: test
+    licenseUrl: test
+    externalDocDesc: test
+    externalDocUrl: test
+    contact:
+      name: test
+      url: test
+      email: test

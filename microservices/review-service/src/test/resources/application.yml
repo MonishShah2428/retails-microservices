@@ -1,0 +1,7 @@
+server:
+  port: 7003
+
+spring:
+  cloud:
+    config:
+      enabled: false
