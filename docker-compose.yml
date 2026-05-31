@@ -92,7 +92,7 @@ services:
     mem_limit: 512m
     ports:
       - "27017:27017"
-    command: mongod
+    command: mongod --quiet --logLevel 0
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 5s
@@ -140,3 +140,11 @@ services:
           condition: service_started
         eureka:
           condition: service_started
+  zipkin:
+    image: openzipkin/zipkin
+    restart: always
+    mem_limit: 512m
+    environment:
+      - STORAGE_TYPE=mem
+    ports:
+      - "9411:9411"

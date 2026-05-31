@@ -28,8 +28,7 @@ spring:
 logging:
   level:
     root: INFO
-    se.magnus.microservices: DEBUG
-    org.springframework.web: DEBUG
+    se.magnus: INFO
 
 ---
 spring.config.activate.on-profile: docker

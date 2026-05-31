@@ -1,6 +1,10 @@
 package se.magnus.microservices.composite.product.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
@@ -75,8 +79,11 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
   }
 
   @Override
-  public Mono<Product> getProduct(int productId) {
-    String url = productServiceUrl + "/" + productId;
+  @Retry(name = "product")
+  @TimeLimiter(name = "product")
+  @CircuitBreaker(name = "product", fallbackMethod = "getProductFallbackValue")
+  public Mono<Product> getProduct(int productId, int delay, int faultPercent) {
+    String url = productServiceUrl + "/" + productId + "?delay=" + delay + "&faultPercent=" + faultPercent;
     LOG.debug("Will call the getProduct API on URL: {}", url);
     return webClient.get()
       .uri(url)
@@ -84,6 +91,14 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
       .onStatus(HttpStatusCode::isError, this::handleError)
       .bodyToMono(Product.class)
       .doOnNext(p -> LOG.debug("Found a product with id: {}", p.productId()));
+  }
+
+  private Mono<Product> getProductFallbackValue(int productId, int delay, int faultPercent, CallNotPermittedException ex) {
+    if (productId == 13) {
+      String errMsg = "Product Id: " + productId + " not found in fallback cache, error message: " + ex.getMessage();
+      throw new NotFoundException(errMsg);
+    }
+    return Mono.just(new Product(productId, "Fallback product" + productId, productId, "N/A"));
   }
 
   @Override

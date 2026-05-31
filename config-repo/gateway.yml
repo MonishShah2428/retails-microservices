@@ -4,6 +4,12 @@ spring:
       default-filters:
         - PreserveHostHeader
       routes:
+        - id: product-composite-actuator
+          uri: lb://product-composite-service
+          predicates:
+            - Path=/product-composite/actuator/**
+          filters:
+            - RewritePath=/product-composite/actuator/(?<segment>.*), /actuator/$\{segment}
         - id: product-composite
           uri: lb://product-composite-service
           predicates:

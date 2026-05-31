@@ -12,6 +12,7 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Hooks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -82,6 +83,7 @@ public class ProductCompositeServiceApplication {
 					.url(apiExternalDocUrl));
 	}
 	public static void main(String[] args) {
+		Hooks.enableAutomaticContextPropagation();
 		SpringApplication.run(ProductCompositeServiceApplication.class, args);
 	}
 
