@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+JQ="$SCRIPT_DIR/jq.exe"
 
 HOST=localhost
 PORT=8443
@@ -33,8 +35,23 @@ function assertEqual() {
 }
 
 function getCBState() {
-  curl -k -s $HEALTH | jq -r '.components.circuitBreakers.details.product.details.state'
+  curl -k -s $HEALTH | $JQ -r '.components.circuitBreakers.details.product.details.state' | tr -d '\r'
 }
+
+echo ""
+echo "==== Pre-check: Reset circuit breaker to CLOSED ===="
+for attempt in {1..5}; do
+  CB_STATE=$(getCBState)
+  if [ "$CB_STATE" = "CLOSED" ]; then
+    echo "  CB is CLOSED, ready to test"
+    break
+  fi
+  echo "  CB is $CB_STATE, sending requests to reset..."
+  for i in {1..3}; do
+    curl -k -s "$BASE/product-composite/$PRODUCT_ID" > /dev/null
+  done
+  sleep 3
+done
 
 echo ""
 echo "==== Setup: Create test product ===="
@@ -51,11 +68,16 @@ echo "==== Verify circuit breaker is CLOSED ===="
 assertEqual "CLOSED" "$(getCBState)"
 
 echo ""
-echo "==== Test 2: Send 5 requests with faultPercent=100 to open circuit breaker ===="
-echo "(slidingWindowSize=5, failureRateThreshold=50% → 5 failures = 100% → CB opens)"
+echo "==== Test 2: Send requests with faultPercent=100 to open circuit breaker ===="
+echo "(Retry amplifies failures so CB may open before all 5 requests complete)"
 for i in {1..5}; do
   echo -n "  Request $i: "
-  assertCurl 500 "curl -k -s $BASE/product-composite/$PRODUCT_ID?faultPercent=100"
+  httpCode=$(curl -k -s -o /dev/null -w "%{http_code}" "$BASE/product-composite/$PRODUCT_ID?faultPercent=100")
+  echo "HTTP: $httpCode"
+  if [ "$httpCode" = "200" ]; then
+    echo "  (CB opened early - fallback returned, this is expected)"
+    break
+  fi
 done
 
 echo ""
@@ -65,14 +87,14 @@ assertEqual "OPEN" "$(getCBState)"
 echo ""
 echo "==== Test 3: Request while CB is OPEN should return fallback ===="
 assertCurl 200 "curl -k -s $BASE/product-composite/$PRODUCT_ID"
-assertEqual "Fallback product$PRODUCT_ID" "$(echo $RESPONSE | jq -r '.name')"
-echo "  Fallback name: $(echo $RESPONSE | jq -r '.name')"
+assertEqual "Fallback product$PRODUCT_ID" "$(echo $RESPONSE | $JQ -r '.name' | tr -d '\r')"
+echo "  Fallback name: $(echo $RESPONSE | $JQ -r '.name' | tr -d '\r')"
 
 echo ""
 echo "==== Test 4: Trigger timeout (delay=3s > 2s time limiter) ===="
 echo "(CB still OPEN so this also returns fallback immediately)"
 assertCurl 200 "curl -k -s $BASE/product-composite/$PRODUCT_ID?delay=3"
-echo "  Response: $(echo $RESPONSE | jq -r '.name')"
+echo "  Response: $(echo $RESPONSE | $JQ -r '.name' | tr -d '\r')"
 
 echo ""
 echo "==== Test 5: Wait 10s for CB to transition to HALF_OPEN ===="

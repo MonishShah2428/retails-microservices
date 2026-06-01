@@ -21,6 +21,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 
 
 
@@ -67,6 +69,7 @@ public class ProductCompositeServiceApplication {
 	@Bean
 	public OpenAPI getOpenAPIDocumentation(){
 		return new OpenAPI()
+				.servers(List.of(new Server().url("https://localhost:8443").description("Gateway")))
 				.info(new Info().title(apiTitle)
 					.description(apiDescription)
 					.version(apiVersion)
