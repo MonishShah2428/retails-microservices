@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -44,7 +43,6 @@ public class ProductCompositeServiceApplication {
 	@Value("${api.common.contact.email}")   String apiContactEmail;
 
 	@Bean
-	@LoadBalanced
 	WebClient.Builder webClientBuilder() {
 		return WebClient.builder();
 	}

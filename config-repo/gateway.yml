@@ -5,17 +5,17 @@ spring:
         - PreserveHostHeader
       routes:
         - id: product-composite-actuator
-          uri: lb://product-composite-service
+          uri: http://product-composite
           predicates:
             - Path=/product-composite/actuator/**
           filters:
             - RewritePath=/product-composite/actuator/(?<segment>.*), /actuator/$\{segment}
         - id: product-composite
-          uri: lb://product-composite-service
+          uri: http://product-composite
           predicates:
             - Path=/product-composite/**
         - id: openapi
-          uri: lb://product-composite-service
+          uri: http://product-composite
           predicates:
             - Path=/openapi/**
         - id: config
@@ -24,26 +24,6 @@ spring:
             - Path=/config/**
           filters:
             - RewritePath=/config/(?<segment>.*), /$\{segment}
-        - id: eureka-api
-          uri: http://${app.eureka-server}:8761
-          predicates:
-            - Path=/eureka/api/{segment}
-          filters:
-            - SetPath=/eureka/{segment}
-            - AddRequestHeader=Authorization, Basic ${app.eureka-auth}
-        - id: eureka-web-start
-          uri: http://${app.eureka-server}:8761
-          predicates:
-            - Path=/eureka/web
-          filters:
-            - SetPath=/
-            - AddRequestHeader=Authorization, Basic ${app.eureka-auth}
-        - id: eureka-web-other
-          uri: http://${app.eureka-server}:8761
-          predicates:
-            - Path=/eureka/**
-          filters:
-            - AddRequestHeader=Authorization, Basic ${app.eureka-auth}
 
 server:
   port: 8443
@@ -55,10 +35,6 @@ server:
 
 app:
   config-server: localhost
-  eureka-server: localhost
-  eureka-username: eureka
-  eureka-password: password
-  eureka-auth: ZXVyZWthOnBhc3N3b3Jk
 
 management:
   endpoint:
@@ -79,4 +55,3 @@ logging:
 ---
 spring.config.activate.on-profile: docker
 app.config-server: config
-app.eureka-server: eureka

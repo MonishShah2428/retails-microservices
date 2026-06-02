@@ -6,7 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
-        "eureka.client.enabled=false",
         "spring.cloud.config.enabled=false",
         "server.ssl.enabled=false"
     }

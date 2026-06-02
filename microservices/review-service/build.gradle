@@ -48,7 +48,6 @@ dependencies {
 	testImplementation 'org.springframework.cloud:spring-cloud-stream-test-binder'
     testRuntimeOnly 'com.h2database:h2'
 
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.retry:spring-retry'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'

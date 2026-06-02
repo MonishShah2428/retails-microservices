@@ -1,16 +1,5 @@
-app:
-  eureka-username: eureka
-  eureka-password: password
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://${app.eureka-username}:${app.eureka-password}@localhost:8761/eureka/
-    initialInstanceInfoReplicationIntervalSeconds: 5
-    registryFetchIntervalSeconds: 5
-  instance:
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 5
+server.shutdown: graceful
+spring.lifecycle.timeout-per-shutdown-phase: 10s
 
 spring.rabbitmq:
   host: 127.0.0.1
@@ -22,6 +11,11 @@ management:
   endpoint:
     health:
       show-details: "ALWAYS"
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState, rabbit, db, mongo
   endpoints:
     web:
       exposure:
@@ -37,5 +31,4 @@ logging.pattern.level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId
 
 ---
 spring.config.activate.on-profile: docker
-eureka.client.serviceUrl.defaultZone: http://${app.eureka-username}:${app.eureka-password}@eureka:8761/eureka/
 spring.rabbitmq.host: rabbitmq

@@ -13,18 +13,6 @@ services:
     volumes:
       - ./config-repo:/config-repo
 
-  eureka:
-    build: discovery/netflix
-    mem_limit: 512m
-    ports:
-      - "8761:8761"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_CONFIG_URI=http://config:8888
-    depends_on:
-      config:
-        condition: service_started
-
   product:
     build: microservices/product-service
     mem_limit: 512m
@@ -34,8 +22,6 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
       config:
-        condition: service_started
-      eureka:
         condition: service_started
       mongodb:
         condition: service_healthy
@@ -52,8 +38,6 @@ services:
     depends_on:
       config:
         condition: service_started
-      eureka:
-        condition: service_started
       mongodb:
         condition: service_healthy
       rabbitmq:
@@ -69,8 +53,6 @@ services:
     depends_on:
       config:
         condition: service_started
-      eureka:
-        condition: service_started
       mysql:
         condition: service_healthy
       rabbitmq:
@@ -84,8 +66,6 @@ services:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
       config:
-        condition: service_started
-      eureka:
         condition: service_started
       rabbitmq:
         condition: service_healthy
@@ -141,8 +121,7 @@ services:
       depends_on:
         config:
           condition: service_started
-        eureka:
-          condition: service_started
+
   zipkin:
     image: openzipkin/zipkin
     restart: always

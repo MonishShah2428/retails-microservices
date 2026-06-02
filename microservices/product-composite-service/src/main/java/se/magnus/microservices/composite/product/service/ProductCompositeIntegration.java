@@ -61,13 +61,13 @@ public class ProductCompositeIntegration implements ProductService, Recommendati
     this.streamBridge = streamBridge;
     this.publishEventScheduler = publishEventScheduler;
 
-    productServiceUrl        = "http://product-service/product";
-    recommendationServiceUrl = "http://recommendation-service/recommendation";
-    reviewServiceUrl         = "http://review-service/review";
+    productServiceUrl        = "http://product/product";
+    recommendationServiceUrl = "http://recommendation/recommendation";
+    reviewServiceUrl         = "http://review/review";
 
-    productServiceHealthUrl        = "http://product-service";
-    recommendationServiceHealthUrl = "http://recommendation-service";
-    reviewServiceHealthUrl         = "http://review-service";
+    productServiceHealthUrl        = "http://product";
+    recommendationServiceHealthUrl = "http://recommendation";
+    reviewServiceHealthUrl         = "http://review";
   }
 
   @Override
