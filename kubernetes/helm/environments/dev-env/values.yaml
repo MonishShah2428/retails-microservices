@@ -1,0 +1,191 @@
+secrets:
+
+  config-server-secrets:
+    ENCRYPT_KEY: my-very-secure-encrypt-key
+    SPRING_SECURITY_USER_NAME: dev-usr
+    SPRING_SECURITY_USER_PASSWORD: dev-pwd
+
+  config-client-credentials:
+    CONFIG_SERVER_USR: dev-usr
+    CONFIG_SERVER_PWD: dev-pwd
+
+mongodb:
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 256Mi
+
+mysql:
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 600Mi
+  env:
+    MYSQL_ROOT_PASSWORD: rootpwd
+    MYSQL_DATABASE: review-db
+    MYSQL_USER: user
+    MYSQL_PASSWORD: pwd
+
+rabbitmq:
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 256Mi
+
+zipkin-server:
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 256Mi
+
+config-server:
+  envFromSecretRefs:
+    - config-server-secrets
+  env:
+    SPRING_PROFILES_ACTIVE: "docker,native"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 512Mi
+  livenessProbe:
+    httpGet:
+      port: 8888
+      httpHeaders:
+        - name: Authorization
+          value: Basic ZGV2LXVzcjpkZXYtcHdk
+    initialDelaySeconds: 40
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 20
+  readinessProbe:
+    httpGet:
+      port: 8888
+      httpHeaders:
+        - name: Authorization
+          value: Basic ZGV2LXVzcjpkZXYtcHdk
+    initialDelaySeconds: 40
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+gateway:
+  envFromSecretRefs:
+    - config-client-credentials
+  env:
+    SPRING_PROFILES_ACTIVE: "docker"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 350Mi
+  livenessProbe:
+    httpGet:
+      scheme: HTTPS
+      port: 8443
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+  readinessProbe:
+    httpGet:
+      scheme: HTTPS
+      port: 8443
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 10
+
+product:
+  envFromSecretRefs:
+    - config-client-credentials
+  env:
+    SPRING_PROFILES_ACTIVE: "docker"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 512Mi
+  livenessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 60
+  readinessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 20
+
+recommendation:
+  envFromSecretRefs:
+    - config-client-credentials
+  env:
+    SPRING_PROFILES_ACTIVE: "docker"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 512Mi
+  livenessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 60
+  readinessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 20
+
+review:
+  envFromSecretRefs:
+    - config-client-credentials
+  env:
+    SPRING_PROFILES_ACTIVE: "docker"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 512Mi
+  livenessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 60
+  readinessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 20
+
+product-composite:
+  envFromSecretRefs:
+    - config-client-credentials
+  env:
+    SPRING_PROFILES_ACTIVE: "docker"
+    JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 512Mi
+  livenessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 60
+  readinessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 20
