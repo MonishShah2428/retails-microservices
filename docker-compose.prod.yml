@@ -18,9 +18,12 @@ services:
     mem_limit: 512m
     ports:
       - "8761:8761"
+    entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
       config:
         condition: service_started
@@ -32,6 +35,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
       config:
         condition: service_started
@@ -49,6 +54,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
       config:
         condition: service_started
@@ -66,6 +73,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
       config:
         condition: service_started
@@ -79,9 +88,12 @@ services:
   product-composite:
     image: ${DOCKERHUB_USER}/product-composite-service:${IMAGE_TAG:-latest}
     mem_limit: 512m
+    entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
       config:
         condition: service_started
@@ -135,9 +147,12 @@ services:
     mem_limit: 512m
     ports:
       - "8443:8443"
+    entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - CONFIG_SERVER_USR=${CONFIG_SERVER_USR}
+      - CONFIG_SERVER_PWD=${CONFIG_SERVER_PWD}
     depends_on:
       config:
         condition: service_started
