@@ -2,8 +2,8 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_USER = 'fierypriest'   // ← replace with your Docker Hub username
-    APP_EC2_IP     = 'YOUR_APP_EC2_IP'            // ← replace with App EC2 Elastic IP
+    DOCKERHUB_USER = 'fierypriest'
+    APP_EC2_IP     = '3.93.119.86'
     IMAGE_TAG      = "${env.BUILD_NUMBER}"
   }
 
