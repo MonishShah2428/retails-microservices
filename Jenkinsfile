@@ -25,27 +25,27 @@ pipeline {
             credentialsId: 'dockerhub-creds',
             usernameVariable: 'DH_USER',
             passwordVariable: 'DH_PASS')]) {
-          sh 'echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin'
-        }
-        script {
-          def services = [
-            [name: 'product-service',           dir: 'microservices/product-service'],
-            [name: 'recommendation-service',    dir: 'microservices/recommendation-service'],
-            [name: 'review-service',            dir: 'microservices/review-service'],
-            [name: 'product-composite-service', dir: 'microservices/product-composite-service'],
-            [name: 'config-server',             dir: 'discovery/config'],
-            [name: 'eureka-server',             dir: 'discovery/netflix'],
-            [name: 'gateway',                   dir: 'discovery/edge'],
-          ]
-          services.each { svc ->
-            sh """
-              docker build \\
-                -t ${DOCKERHUB_USER}/${svc.name}:${IMAGE_TAG} \\
-                -t ${DOCKERHUB_USER}/${svc.name}:latest \\
-                ${svc.dir}
-              docker push ${DOCKERHUB_USER}/${svc.name}:${IMAGE_TAG}
-              docker push ${DOCKERHUB_USER}/${svc.name}:latest
-            """
+          script {
+            def services = [
+              [name: 'product-service',           dir: 'microservices/product-service'],
+              [name: 'recommendation-service',    dir: 'microservices/recommendation-service'],
+              [name: 'review-service',            dir: 'microservices/review-service'],
+              [name: 'product-composite-service', dir: 'microservices/product-composite-service'],
+              [name: 'config-server',             dir: 'discovery/config'],
+              [name: 'eureka-server',             dir: 'discovery/netflix'],
+              [name: 'gateway',                   dir: 'discovery/edge'],
+            ]
+            services.each { svc ->
+              sh """
+                echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                docker build \\
+                  -t ${DOCKERHUB_USER}/${svc.name}:${IMAGE_TAG} \\
+                  -t ${DOCKERHUB_USER}/${svc.name}:latest \\
+                  ${svc.dir}
+                docker push ${DOCKERHUB_USER}/${svc.name}:${IMAGE_TAG}
+                docker push ${DOCKERHUB_USER}/${svc.name}:latest
+              """
+            }
           }
         }
       }
