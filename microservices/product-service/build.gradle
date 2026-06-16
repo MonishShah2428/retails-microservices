@@ -63,6 +63,10 @@ configurations.all {
 	exclude group: 'io.micrometer', module: 'micrometer-tracing-bridge-brave'
 }
 
+jar {
+	enabled = false
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
