@@ -50,6 +50,8 @@ api:
 
 spring:
   cloud:
+    function:
+      definition: ""
     stream:
       defaultBinder: rabbit
       default.contentType: application/json
