@@ -1,0 +1,154 @@
+services:
+
+  config:
+    image: ${DOCKERHUB_USER}/config-server:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,native
+      - ENCRYPT_KEY=${CONFIG_SERVER_ENCRYPT_KEY}
+      - SPRING_SECURITY_USER_NAME=${CONFIG_SERVER_USR}
+      - SPRING_SECURITY_USER_PASSWORD=${CONFIG_SERVER_PWD}
+    volumes:
+      - ./config-repo:/config-repo
+
+  eureka:
+    image: ${DOCKERHUB_USER}/eureka-server:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+    depends_on:
+      config:
+        condition: service_started
+
+  product:
+    image: ${DOCKERHUB_USER}/product-service:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+    depends_on:
+      config:
+        condition: service_started
+      eureka:
+        condition: service_started
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  recommendation:
+    image: ${DOCKERHUB_USER}/recommendation-service:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+    depends_on:
+      config:
+        condition: service_started
+      eureka:
+        condition: service_started
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  review:
+    image: ${DOCKERHUB_USER}/review-service:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+    depends_on:
+      config:
+        condition: service_started
+      eureka:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  product-composite:
+    image: ${DOCKERHUB_USER}/product-composite-service:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+    depends_on:
+      config:
+        condition: service_started
+      eureka:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  mongodb:
+    image: mongo:8.0
+    mem_limit: 512m
+    ports:
+      - "27017:27017"
+    command: mongod --quiet
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 2s
+      retries: 60
+
+  mysql:
+    image: mysql:8.4
+    mem_limit: 512m
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=review-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    healthcheck:
+      test: "/usr/bin/mysql --user=user --password=pwd --execute \"SHOW DATABASES;\""
+      interval: 5s
+      timeout: 2s
+      retries: 60
+
+  rabbitmq:
+    image: rabbitmq:management
+    mem_limit: 512m
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 60
+
+  gateway:
+    image: ${DOCKERHUB_USER}/gateway:${IMAGE_TAG:-latest}
+    mem_limit: 512m
+    ports:
+      - "8443:8443"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
+    depends_on:
+      config:
+        condition: service_started
+      eureka:
+        condition: service_started
+
+  zipkin:
+    image: openzipkin/zipkin
+    restart: always
+    mem_limit: 512m
+    environment:
+      - STORAGE_TYPE=mem
+    ports:
+      - "9411:9411"

@@ -38,3 +38,5 @@ out/
 
 ### Secrets ###
 .env
+.env.production
+.env.local
