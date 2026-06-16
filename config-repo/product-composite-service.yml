@@ -1,6 +1,6 @@
 server:
   port: 7000
-  forward-headers-strategy: framework
+  forward-headers-strategy: native
 
 springdoc:
   swagger-ui.path: /openapi/swagger-ui.html
