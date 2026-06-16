@@ -79,6 +79,7 @@ gateway:
     - config-client-credentials
   env:
     SPRING_PROFILES_ACTIVE: "docker"
+    SPRING_CLOUD_CONFIG_URI: "http://config:8888"
     JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
   resources:
     requests:
@@ -107,6 +108,7 @@ product:
     - config-client-credentials
   env:
     SPRING_PROFILES_ACTIVE: "docker"
+    SPRING_CLOUD_CONFIG_URI: "http://config:8888"
     JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
   resources:
     requests:
@@ -129,6 +131,7 @@ recommendation:
     - config-client-credentials
   env:
     SPRING_PROFILES_ACTIVE: "docker"
+    SPRING_CLOUD_CONFIG_URI: "http://config:8888"
     JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
   resources:
     requests:
@@ -151,6 +154,7 @@ review:
     - config-client-credentials
   env:
     SPRING_PROFILES_ACTIVE: "docker"
+    SPRING_CLOUD_CONFIG_URI: "http://config:8888"
     JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
   resources:
     requests:
@@ -173,6 +177,7 @@ product-composite:
     - config-client-credentials
   env:
     SPRING_PROFILES_ACTIVE: "docker"
+    SPRING_CLOUD_CONFIG_URI: "http://config:8888"
     JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60.0"
   resources:
     requests:
