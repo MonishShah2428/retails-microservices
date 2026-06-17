@@ -56,6 +56,9 @@ spring:
       defaultBinder: rabbit
       default.contentType: application/json
       bindings:
+        forwardedHeaderTransformer-in-0:
+          consumer:
+            auto-startup: false
         products-out-0:
           destination: products
           producer:
