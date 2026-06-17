@@ -159,6 +159,14 @@ services:
       eureka:
         condition: service_started
 
+  frontend:
+    image: ${DOCKERHUB_USER}/frontend:${IMAGE_TAG:-latest}
+    mem_limit: 256m
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway
+
   zipkin:
     image: openzipkin/zipkin
     restart: always

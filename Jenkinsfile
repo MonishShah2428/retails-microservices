@@ -34,6 +34,7 @@ pipeline {
               [name: 'config-server',             dir: 'discovery/config'],
               [name: 'eureka-server',             dir: 'discovery/netflix'],
               [name: 'gateway',                   dir: 'discovery/edge'],
+              [name: 'frontend',                  dir: 'frontend'],
             ]
             services.each { svc ->
               sh """
