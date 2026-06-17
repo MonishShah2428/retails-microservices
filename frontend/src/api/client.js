@@ -11,7 +11,8 @@ async function request(path, options = {}) {
     throw Object.assign(new Error(err.message || res.statusText), { status: res.status })
   }
   const text = await res.text()
-  return text ? JSON.parse(text) : null
+  if (!text) return null
+  try { return JSON.parse(text) } catch { return null }
 }
 
 export const api = {

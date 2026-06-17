@@ -79,7 +79,8 @@ export default function AddProduct() {
         recommendations: recommendations.filter((r) => r.author),
         reviews: reviews.filter((r) => r.author && r.subject),
       })
-      toast(`Product "${name}" created successfully`)
+      toast(`Product "${name}" created — redirecting in a moment...`)
+      await new Promise((r) => setTimeout(r, 1500))
       navigate(`/products/${productId}`)
     } catch (err) {
       setError(err.message)
