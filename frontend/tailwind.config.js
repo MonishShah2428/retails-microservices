@@ -4,13 +4,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Rubik', 'sans-serif'],
-        body: ['Nunito Sans', 'sans-serif'],
+        heading: ['"Fira Code"', 'monospace'],
+        body: ['"Fira Sans"', 'sans-serif'],
+        mono: ['"Fira Code"', 'monospace'],
       },
       colors: {
         surface: 'rgba(255,255,255,0.05)',
-        'surface-hover': 'rgba(255,255,255,0.08)',
-        glass: 'rgba(255,255,255,0.03)',
       },
       backgroundImage: {
         'grid-pattern':
@@ -21,7 +20,7 @@ export default {
       },
       animation: {
         'blob-slow': 'blob 12s infinite ease-in-out',
-        'fade-in': 'fadeIn 0.4s ease-out',
+        'fade-in': 'fadeIn 0.35s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
       },
       keyframes: {
@@ -35,7 +34,7 @@ export default {
           to: { opacity: '1' },
         },
         slideUp: {
-          from: { opacity: '0', transform: 'translateY(12px)' },
+          from: { opacity: '0', transform: 'translateY(10px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
       },

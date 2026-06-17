@@ -1,14 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../api/client.js'
-
-function PlusIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-  )
-}
+import InteractiveStars from '../components/InteractiveStars.jsx'
 
 function TrashIcon() {
   return (
@@ -28,40 +21,40 @@ export default function AddProduct() {
   const [weight, setWeight] = useState('')
 
   const [recommendations, setRecommendations] = useState([
-    { recommendationId: 1, author: '', rate: 5, content: '' },
+    { recommendationId: 1, author: '', rate: 0, content: '' },
   ])
   const [reviews, setReviews] = useState([
     { reviewId: 1, author: '', subject: '', content: '' },
   ])
 
   function addRecommendation() {
-    setRecommendations(prev => [
+    setRecommendations((prev) => [
       ...prev,
-      { recommendationId: prev.length + 1, author: '', rate: 5, content: '' },
+      { recommendationId: prev.length + 1, author: '', rate: 0, content: '' },
     ])
   }
 
   function removeRecommendation(idx) {
-    setRecommendations(prev => prev.filter((_, i) => i !== idx))
+    setRecommendations((prev) => prev.filter((_, i) => i !== idx))
   }
 
   function updateRec(idx, field, value) {
-    setRecommendations(prev => prev.map((r, i) => i === idx ? { ...r, [field]: value } : r))
+    setRecommendations((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)))
   }
 
   function addReview() {
-    setReviews(prev => [
+    setReviews((prev) => [
       ...prev,
       { reviewId: prev.length + 1, author: '', subject: '', content: '' },
     ])
   }
 
   function removeReview(idx) {
-    setReviews(prev => prev.filter((_, i) => i !== idx))
+    setReviews((prev) => prev.filter((_, i) => i !== idx))
   }
 
   function updateRev(idx, field, value) {
-    setReviews(prev => prev.map((r, i) => i === idx ? { ...r, [field]: value } : r))
+    setReviews((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)))
   }
 
   async function handleSubmit(e) {
@@ -73,8 +66,8 @@ export default function AddProduct() {
         productId: Number(productId),
         name,
         weight: Number(weight),
-        recommendations: recommendations.filter(r => r.author),
-        reviews: reviews.filter(r => r.author && r.subject),
+        recommendations: recommendations.filter((r) => r.author),
+        reviews: reviews.filter((r) => r.author && r.subject),
       })
       navigate(`/products/${productId}`)
     } catch (err) {
@@ -84,149 +77,214 @@ export default function AddProduct() {
   }
 
   return (
-    <div className="animate-fade-in max-w-2xl space-y-6 pb-12">
-      <div className="flex items-center gap-2 text-slate-500 text-sm">
+    <div className="animate-fade-in max-w-2xl pb-12 space-y-8">
+
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-slate-600">
         <Link to="/products" className="hover:text-slate-300 transition-colors">Products</Link>
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
-        <span className="text-slate-300">New Product</span>
-      </div>
+        <span className="text-slate-400">New Product</span>
+      </nav>
 
-      <div>
-        <h1 className="font-heading text-3xl font-bold text-slate-100">Add Product</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Creates a composite product â€” publishes events to product, recommendation, and review consumers via RabbitMQ.
+      <div className="page-header mb-0">
+        <h1 className="page-title">Add Product</h1>
+        <p className="page-subtitle">
+          Publishes CREATE events to product, recommendation, and review services via RabbitMQ.
         </p>
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm flex items-start gap-2" role="alert">
+          <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Product info */}
-        <div className="glass-card p-6 space-y-4">
-          <h2 className="font-heading text-base font-semibold text-slate-200">Product Info</h2>
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+
+        {/* Product Info */}
+        <div className="glass-card p-6 space-y-5">
+          <h2 className="section-title">Product Info</h2>
           <div className="grid sm:grid-cols-3 gap-4">
             <div>
-              <label className="label" htmlFor="productId">Product ID *</label>
-              <input id="productId" type="number" required min={1} value={productId}
-                onChange={e => setProductId(e.target.value)}
-                placeholder="e.g. 42" className="input-field" />
+              <label className="label" htmlFor="productId">Product ID <span className="text-red-500">*</span></label>
+              <input
+                id="productId" type="number" required min={1} value={productId}
+                onChange={(e) => setProductId(e.target.value)}
+                placeholder="e.g. 42" className="input-field"
+                aria-describedby="productId-hint"
+              />
+              <p id="productId-hint" className="text-slate-600 text-xs mt-1.5">Must be a unique integer</p>
             </div>
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="name">Name *</label>
-              <input id="name" type="text" required value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="e.g. Wireless Headphones" className="input-field" />
+              <label className="label" htmlFor="name">Name <span className="text-red-500">*</span></label>
+              <input
+                id="name" type="text" required value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Wireless Headphones" className="input-field"
+              />
             </div>
           </div>
-          <div>
-            <label className="label" htmlFor="weight">Weight (grams) *</label>
-            <input id="weight" type="number" required min={0} value={weight}
-              onChange={e => setWeight(e.target.value)}
-              placeholder="e.g. 250" className="input-field" />
+          <div className="max-w-xs">
+            <label className="label" htmlFor="weight">Weight (grams) <span className="text-red-500">*</span></label>
+            <input
+              id="weight" type="number" required min={0} value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder="e.g. 250" className="input-field"
+            />
           </div>
         </div>
 
         {/* Recommendations */}
-        <div className="glass-card p-6 space-y-4">
+        <div className="glass-card p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-base font-semibold text-slate-200">Recommendations</h2>
-            <button type="button" onClick={addRecommendation}
-              className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1">
-              <PlusIcon /> Add
+            <div>
+              <h2 className="section-title">Recommendations</h2>
+              <p className="text-slate-600 text-xs mt-0.5">Leave author blank to skip</p>
+            </div>
+            <button type="button" onClick={addRecommendation} className="btn-ghost text-xs py-1.5 px-3">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add
             </button>
           </div>
-          {recommendations.map((rec, idx) => (
-            <div key={idx} className="bg-white/5 rounded-xl p-4 space-y-3 border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500 text-xs">Recommendation {idx + 1}</span>
-                {recommendations.length > 1 && (
-                  <button type="button" onClick={() => removeRecommendation(idx)}
-                    className="text-slate-600 hover:text-red-400 transition-colors">
-                    <TrashIcon />
-                  </button>
-                )}
-              </div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="label">Author</label>
-                  <input type="text" value={rec.author}
-                    onChange={e => updateRec(idx, 'author', e.target.value)}
-                    placeholder="Author name" className="input-field" />
+
+          <div className="space-y-4">
+            {recommendations.map((rec, idx) => (
+              <div key={idx} className="bg-white/[0.03] rounded-xl p-5 border border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 text-xs font-mono">rec_{idx + 1}</span>
+                  {recommendations.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRecommendation(idx)}
+                      className="text-slate-700 hover:text-red-400 transition-colors p-1 cursor-pointer"
+                      aria-label="Remove recommendation"
+                    >
+                      <TrashIcon />
+                    </button>
+                  )}
                 </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Author</label>
+                    <input
+                      type="text" value={rec.author}
+                      onChange={(e) => updateRec(idx, 'author', e.target.value)}
+                      placeholder="Author name" className="input-field"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Rating</label>
+                    <div className="pt-1">
+                      <InteractiveStars value={rec.rate} onChange={(v) => updateRec(idx, 'rate', v)} />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="label">Rating â€” {rec.rate}/5</label>
-                  <input type="range" min={1} max={5} value={rec.rate}
-                    onChange={e => updateRec(idx, 'rate', Number(e.target.value))}
-                    className="w-full mt-2 accent-amber-400 cursor-pointer" />
+                  <label className="label">Content</label>
+                  <input
+                    type="text" value={rec.content}
+                    onChange={(e) => updateRec(idx, 'content', e.target.value)}
+                    placeholder="Brief recommendation text" className="input-field"
+                  />
                 </div>
               </div>
-              <div>
-                <label className="label">Content</label>
-                <input type="text" value={rec.content}
-                  onChange={e => updateRec(idx, 'content', e.target.value)}
-                  placeholder="Recommendation text" className="input-field" />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Reviews */}
-        <div className="glass-card p-6 space-y-4">
+        <div className="glass-card p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-heading text-base font-semibold text-slate-200">Reviews</h2>
-            <button type="button" onClick={addReview}
-              className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1">
-              <PlusIcon /> Add
+            <div>
+              <h2 className="section-title">Reviews</h2>
+              <p className="text-slate-600 text-xs mt-0.5">Leave author blank to skip</p>
+            </div>
+            <button type="button" onClick={addReview} className="btn-ghost text-xs py-1.5 px-3">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add
             </button>
           </div>
-          {reviews.map((rev, idx) => (
-            <div key={idx} className="bg-white/5 rounded-xl p-4 space-y-3 border border-white/5">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500 text-xs">Review {idx + 1}</span>
-                {reviews.length > 1 && (
-                  <button type="button" onClick={() => removeReview(idx)}
-                    className="text-slate-600 hover:text-red-400 transition-colors">
-                    <TrashIcon />
-                  </button>
-                )}
-              </div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="label">Author</label>
-                  <input type="text" value={rev.author}
-                    onChange={e => updateRev(idx, 'author', e.target.value)}
-                    placeholder="Author name" className="input-field" />
+
+          <div className="space-y-4">
+            {reviews.map((rev, idx) => (
+              <div key={idx} className="bg-white/[0.03] rounded-xl p-5 border border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600 text-xs font-mono">review_{idx + 1}</span>
+                  {reviews.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeReview(idx)}
+                      className="text-slate-700 hover:text-red-400 transition-colors p-1 cursor-pointer"
+                      aria-label="Remove review"
+                    >
+                      <TrashIcon />
+                    </button>
+                  )}
                 </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Author</label>
+                    <input
+                      type="text" value={rev.author}
+                      onChange={(e) => updateRev(idx, 'author', e.target.value)}
+                      placeholder="Author name" className="input-field"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Subject</label>
+                    <input
+                      type="text" value={rev.subject}
+                      onChange={(e) => updateRev(idx, 'subject', e.target.value)}
+                      placeholder="Review subject line" className="input-field"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="label">Subject</label>
-                  <input type="text" value={rev.subject}
-                    onChange={e => updateRev(idx, 'subject', e.target.value)}
-                    placeholder="Review subject" className="input-field" />
+                  <label className="label">Content</label>
+                  <input
+                    type="text" value={rev.content}
+                    onChange={(e) => updateRev(idx, 'content', e.target.value)}
+                    placeholder="Full review text" className="input-field"
+                  />
                 </div>
               </div>
-              <div>
-                <label className="label">Content</label>
-                <input type="text" value={rev.content}
-                  onChange={e => updateRev(idx, 'content', e.target.value)}
-                  placeholder="Review content" className="input-field" />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button type="submit" disabled={submitting}
-            className="btn-primary px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
-            {submitting ? 'Creatingâ€¦' : 'Create Product'}
+        {/* Actions */}
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn-primary px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Creating...
+              </>
+            ) : 'Create Product'}
           </button>
           <Link to="/products" className="btn-ghost px-6 py-3">Cancel</Link>
         </div>
+
       </form>
     </div>
   )
