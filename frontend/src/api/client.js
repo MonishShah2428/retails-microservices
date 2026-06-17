@@ -5,12 +5,13 @@ async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
-  if (res.status === 204 || res.status === 202) return null
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }))
+    const text = await res.text().catch(() => '')
+    const err = text ? JSON.parse(text) : {}
     throw Object.assign(new Error(err.message || res.statusText), { status: res.status })
   }
-  return res.json()
+  const text = await res.text()
+  return text ? JSON.parse(text) : null
 }
 
 export const api = {
