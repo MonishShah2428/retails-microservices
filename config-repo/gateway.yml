@@ -1,6 +1,16 @@
 spring:
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
       x-forwarded:
         enabled: true
         for-enabled: true
