@@ -69,7 +69,7 @@ public class ProductCompositeServiceApplication {
 	@Bean
 	public OpenAPI getOpenAPIDocumentation(){
 		return new OpenAPI()
-				.servers(List.of(new Server().url("https://localhost:8443").description("Gateway")))
+				.servers(List.of(new Server().url("/").description("Gateway")))
 				.info(new Info().title(apiTitle)
 					.description(apiDescription)
 					.version(apiVersion)
