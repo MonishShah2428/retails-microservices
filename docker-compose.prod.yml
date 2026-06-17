@@ -2,6 +2,7 @@ services:
 
   config:
     image: ${DOCKERHUB_USER}/config-server:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     ports:
       - "8888:8888"
@@ -15,6 +16,7 @@ services:
 
   eureka:
     image: ${DOCKERHUB_USER}/eureka-server:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     ports:
       - "8761:8761"
@@ -30,6 +32,7 @@ services:
 
   product:
     image: ${DOCKERHUB_USER}/product-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
@@ -49,6 +52,7 @@ services:
 
   recommendation:
     image: ${DOCKERHUB_USER}/recommendation-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
@@ -68,6 +72,7 @@ services:
 
   review:
     image: ${DOCKERHUB_USER}/review-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
@@ -87,6 +92,7 @@ services:
 
   product-composite:
     image: ${DOCKERHUB_USER}/product-composite-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     entrypoint: ["sh", "-c", "sleep 30 && java org.springframework.boot.loader.launch.JarLauncher"]
     environment:
@@ -104,6 +110,7 @@ services:
 
   mongodb:
     image: mongo:7.0
+    restart: unless-stopped
     mem_limit: 512m
     ports:
       - "27017:27017"
@@ -116,6 +123,7 @@ services:
 
   mysql:
     image: mysql:8.4
+    restart: unless-stopped
     mem_limit: 512m
     ports:
       - "3306:3306"
@@ -132,6 +140,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
+    restart: unless-stopped
     mem_limit: 512m
     ports:
       - "5672:5672"
@@ -144,6 +153,7 @@ services:
 
   gateway:
     image: ${DOCKERHUB_USER}/gateway:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 512m
     ports:
       - "8443:8443"
@@ -161,6 +171,7 @@ services:
 
   frontend:
     image: ${DOCKERHUB_USER}/frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     mem_limit: 256m
     ports:
       - "80:80"
