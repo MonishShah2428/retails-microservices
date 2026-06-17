@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['"Fira Code"', 'monospace'],
-        body: ['"Fira Sans"', 'sans-serif'],
-        mono: ['"Fira Code"', 'monospace'],
+        heading: ['Inter', 'sans-serif'],
+        body:    ['Inter', 'sans-serif'],
+        mono:    ['"Fira Code"', 'monospace'],
       },
       colors: {
         surface: 'rgba(255,255,255,0.05)',
@@ -20,22 +20,22 @@ export default {
       },
       animation: {
         'blob-slow': 'blob 12s infinite ease-in-out',
-        'fade-in': 'fadeIn 0.35s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
+        'fade-in':   'fadeIn 0.4s ease-out both',
+        'slide-up':  'slideUp 0.3s ease-out both',
       },
       keyframes: {
         blob: {
           '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-          '33%': { transform: 'translate(30px, -20px) scale(1.05)' },
-          '66%': { transform: 'translate(-20px, 20px) scale(0.95)' },
+          '33%':      { transform: 'translate(30px, -20px) scale(1.05)' },
+          '66%':      { transform: 'translate(-20px, 20px) scale(0.95)' },
         },
         fadeIn: {
-          from: { opacity: '0' },
-          to: { opacity: '1' },
+          from: { opacity: '0', transform: 'translateY(6px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
         slideUp: {
-          from: { opacity: '0', transform: 'translateY(10px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },
